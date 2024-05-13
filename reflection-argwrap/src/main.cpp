@@ -121,23 +121,25 @@ void TestFoo()
     std::string hello_s {"hello"};
     std::string world_s {" world"};
 
-    auto foo_pass_by_val = foo_t.GetMemberFunc("PassByValue");
-    foo_pass_by_val.Invoke(f, hello_s);
+    //auto foo_pass_by_val = foo_t.GetMemberFunc("PassByValue");
+    //foo_pass_by_val.Invoke(f, hello_s);
 
     auto foo_pass_by_cref = foo_t.GetMemberFunc("PassByConstRef");
-    foo_pass_by_cref.Invoke(f, hello_s); // Ok
-    f.PassByConstRef(std::ref(hello_s)); // Ok
-    // foo_pass_by_cref.Invoke(f, std::ref(hello_s));  // Crash, parameter cast to null
+    //foo_pass_by_cref.Invoke(f, hello_s); // Ok
+    //f.PassByConstRef(std::ref(hello_s)); // Ok
+    foo_pass_by_cref.Invoke(f, std::ref(hello_s));  // Crash, parameter cast to null
     // foo_pass_by_cref.Invoke(f, std::cref(hello_s)); // Crash, parameter cast to null
 
-    auto foo_concat = foo_t.GetMemberFunc("Concat");
-    foo_concat.Invoke(f, hello_s, world_s);
-    res = foo_concat.Invoke(f, hello_s, hello_s);
-    // res = foo_concat.Invoke(f, hello_s, hello_s); // Crash, parameter cast to null
-    std::cout << "Concat got: " << std::any_cast<std::string>(res) << std::endl;
-    std::cout << std::endl;
+    //auto foo_concat = foo_t.GetMemberFunc("Concat");
+    //foo_concat.Invoke(f, hello_s, world_s);
+    //res = foo_concat.Invoke(f, hello_s, hello_s);
+    //// res = foo_concat.Invoke(f, hello_s, hello_s); // Crash, parameter cast to null
+    //std::cout << "Concat got: " << std::any_cast<std::string>(res) << std::endl;
+    //std::cout << std::endl;
 
-    std::cout << "<<< TestFoo OK\n" << std::endl;
+    //std::cout << "<<< TestFoo OK\n" << std::endl;
 }
 
-int main() { TestFoo(); }
+int main() { 
+    TestFoo();
+}

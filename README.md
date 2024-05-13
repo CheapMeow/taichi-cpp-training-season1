@@ -1,6 +1,23 @@
-# cpp-training
+他也是动态反射，只是存储函数信息的时候，用模板元编程来生成那个被存的函数
 
-* [iterators](iterators/)
-* [ti-serialization](ti-serialization/)
-* [reflection](reflection/)
-* [argwrap](argwrap/)
+如果不想用模板，那么用代码生成，也可以生成出被存储的函数，比如 Piccolo
+
+在模板元编程时，因为需要操作类型，所以常用 `std::tuple` 打包类型。比如用这个 `std::tuple` 可以做出包含所有参数的类型的一个 tuple
+
+他最后考虑到 `std::any_cast` 需要一一严格对应的类型转换，所以做了一个 `ArgWarp` 来做类型转换的适配
+
+具体来说，`std::any_cast` 需要 cast 到 `const std::string&` 但是实际 `any` 存储的如果是 `std::string` 的话，`std::any_cast` 就会出错
+
+也就是输入的实参类型 `T1` 和记录的函数的形参的类型 `T2` 之间不匹配，`std::any` 里面存的是 `T1`，但是要 `std::any_cast` 到 `T2`。`std::any_cast` 里面是直接比较 `typeid` 的，所以不会成功，即使你 `static_cast` 从 `T1` 到 `T2` 可以成功
+
+他做的 `ArgWarp` 的适配工作是，假设 `std::any` 存储的类型 `T1` 和 Cast 接口要输出的类型 `T2` 的原始类型，也就是 `std::decay_t` 出来的类型都相同，记为 `RawT`
+
+他就考虑到 `T1` `T2` 分别为 value、const ref、non-const ref 的时候的情况，做了一个 3*3 的转换表，使用 `RawT` 和指针和解引用配合，就能得到正确的 `std::any_cast` 方法，使得我能够利用原本严格的 `std::any_cast` 转换两个不同的但是原始类型相同的类型
+
+但是他基于的假设是 `T1` `T2` 的 `std::decay_t` 出来的类型都相同
+
+实际上别人调用你的反射函数的时候，`T1` `T2` 的 `std::decay_t` 出来的类型还真可能不相同
+
+为什么他会这么用？因为 `static_cast` 从 `T1` 到 `T2` 可以成功，这是不违背直觉的
+
+所以我觉得更省心智的方法应该是，不要在反射系统里面加入这个 `T1` `T2` 的 `std::decay_t` 出来的类型都相同 的隐性约束
